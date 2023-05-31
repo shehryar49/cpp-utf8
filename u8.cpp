@@ -26,6 +26,9 @@ SOFTWARE.*/
 #include <stdexcept>
 #include <exception>
 #include <cstring>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 using namespace std;
 
 class u8string
@@ -418,24 +421,26 @@ public:
 int u8string::npos = INT_MAX;
 int main()
 {
-
-    u8string str({0xe2,0x88,0x82,0x20,0xe2,0x88,0x86,0x20,0xe2,0x88,0x8f,0x20,0xe2,0x88,0x91,'\n'});
-    printf("length = %d\n",str.length());
-    str.write();
-    printf("\nindividual codepoints in hex: \n");
-    for(int i=0;i<str.length();i++)
-    {
-      printf("U+%x\n",str[i]);
-    }
-    printf("---------------\n");
-    //Or initialize from cstring
-    u8string another("∂ ∆ ∏ ∑\n");
-    another.write();
-    printf("%d\n",another.find("∏ ∑"));//search for substring
-    printf("%d\n",another.find(0x2211));//search for codepoint
-    printf("%d\n",another.find("abc"));//prints INT_MAX
-    u8string copy = another;
-    copy.replace("∏ ∑","a b");
-    copy.write();
-    return 0;
+  #ifdef _WIN32
+    SetConsoleOutputCP( 65001 );
+  #endif
+  u8string str({0xe2,0x88,0x82,0x20,0xe2,0x88,0x86,0x20,0xe2,0x88,0x8f,0x20,0xe2,0x88,0x91,'\n'});
+  printf("length = %d\n",str.length());
+  str.write();
+  printf("\nindividual codepoints in hex: \n");
+  for(int i=0;i<str.length();i++)
+  {
+    printf("U+%x\n",str[i]);
+  }
+  printf("---------------\n");
+  //Or initialize from cstring
+  u8string another("∂ ∆ ∏ ∑\n");
+  another.write();
+  printf("%d\n",another.find("∏ ∑"));//search for substring
+  printf("%d\n",another.find(0x2211));//search for codepoint
+  printf("%d\n",another.find("abc"));//prints INT_MAX
+  u8string copy = another;
+  copy.replace("∏ ∑","a b");
+  copy.write();
+  return 0;
 }
