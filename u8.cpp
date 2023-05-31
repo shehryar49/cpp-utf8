@@ -53,7 +53,7 @@ public:
         if(i+1 >= l || (k[i+1] & 0xc0) != 0x80) //not enough bytes
         {
           bytes.clear();
-          return;
+          throw logic_error("invalid byte stream!");
         }
         bytes.push_back(byte);
         bytes.push_back(k[i+1]);
@@ -66,7 +66,7 @@ public:
         if(i+2 >= l || (k[i+1] & 0xc0) != 0x80 || (k[i+2] & 0xc0) != 0x80) //not enough bytes
         {
           bytes.clear();
-          return;
+          throw logic_error("invalid byte stream!");
         }
         bytes.push_back(byte);
         bytes.push_back(k[i+1]);
@@ -80,7 +80,7 @@ public:
         if(i+3 >= l || (k[i+1] & 0xc0) != 0x80 || (k[i+2] & 0xc0) != 0x80 || (k[i+3] & 0xc0) != 0x80) //not enough bytes
         {
           bytes.clear();
-          return;
+          throw logic_error("invalid byte stream!");
         }
         bytes.push_back(byte);
         bytes.push_back(k[i+1]);
@@ -116,7 +116,7 @@ public:
         if(i+1 >= k.size() || (k[i+1] & 0xc0) != 0x80) //not enough bytes
         {
           bytes.clear();
-          return;
+          throw logic_error("invalid byte stream!");
         }
         bytes.push_back(byte);
         bytes.push_back(k[i+1]);
@@ -129,7 +129,7 @@ public:
         if(i+2 >= k.size() || (k[i+1] & 0xc0) != 0x80 || (k[i+2] & 0xc0) != 0x80) //not enough bytes
         {
           bytes.clear();
-          return;
+          throw logic_error("invalid byte stream!");
         }
         bytes.push_back(byte);
         bytes.push_back(k[i+1]);
@@ -143,18 +143,12 @@ public:
         if(i+3 >= k.size() || (k[i+1] & 0xc0) != 0x80 || (k[i+2] & 0xc0) != 0x80 || (k[i+3] & 0xc0) != 0x80) //not enough bytes
         {
           bytes.clear();
-          return;
+          throw logic_error("invalid byte stream!");
         }
         bytes.push_back(byte);
         bytes.push_back(k[i+1]);
         bytes.push_back(k[i+2]);
         bytes.push_back(k[i+3]);
-        /*int a = byte;
-        int b = k[i+1];
-        int c = k[i+2];
-        int d = k[i+3];
-        int x = ((((((a & 0x07)<<6) | (b & 0x3f))<<6) | (c&0x3f))<<6) | (d & 0x3f);
-        printf("codepoint = %x\n",x);*/
         len++;
         i+=3;
         continue;
