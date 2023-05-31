@@ -424,6 +424,8 @@ int main()
   #ifdef _WIN32
     SetConsoleOutputCP( 65001 );
   #endif
+  //Use utf-8 encoding when saving this file
+  //Initialize from vector of bytes
   u8string str({0xe2,0x88,0x82,0x20,0xe2,0x88,0x86,0x20,0xe2,0x88,0x8f,0x20,0xe2,0x88,0x91,'\n'});
   printf("length = %d\n",str.length());
   str.write();
