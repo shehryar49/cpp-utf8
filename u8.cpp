@@ -21,7 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
+#include <limits.h>
 #include <vector>
 #include <stdexcept>
 #include <exception>
@@ -35,7 +37,7 @@ class u8string
 {
 private:
   vector<uint8_t> bytes;
-  int len = 0;
+  size_t len = 0;
 public:
    static int npos; // unicode's max codepoint is (2^21 -1) or 0x1fffff
    //so it will never be INT_MAX
@@ -104,9 +106,9 @@ public:
   }
   u8string(vector<uint8_t> k)
   {
-    int l = k.size();
-    int len = 0; //length in terms of unicode characters
-    for(int i=0;i<l;i++)
+    size_t l = k.size();
+    size_t len = 0; //length in terms of unicode characters
+    for(size_t i=0;i<l;i++)
     {
       uint8_t byte = k[i];
       if(!(byte & 0x80)) //single byte codepoint
@@ -194,8 +196,8 @@ public:
       throw out_of_range("Index out of range!");
     size_t len = 0; //length in terms of unicode characters
     const vector<uint8_t>& k = bytes;
-    int l = k.size();
-    for(int i=0;i<l;i++)
+    size_t l = k.size();
+    for(size_t i=0;i<l;i++)
     {
       uint8_t byte = k[i];
       if(!(byte & 0x80)) //single byte codepoint
@@ -353,10 +355,10 @@ public:
     }
     return npos;
   }
-  void replace(const u8string& x,const u8string& y)
+  bool replace(const u8string& x,const u8string& y)
   {
     if(x.bytes.size()==0 || bytes.size()==0 || x.bytes.size()>bytes.size())
-      return;
+      return false;
     size_t len = 0; //length in terms of unicode characters
     const vector<uint8_t>& k = bytes;
     int l = k.size();
@@ -364,7 +366,7 @@ public:
     {
       uint8_t byte = k[i];
       if(i + x.bytes.size()-1 >= k.size()) // no way we will find a match
-        return;
+        return false;
       if(byte == x.bytes[0])
       {
         bool matched = true;
@@ -378,9 +380,10 @@ public:
         }
         if(matched)
         {
-          bytes.erase(bytes.begin()+i,bytes.begin()+i+x.bytes.size()-1);
+          bytes.erase(bytes.begin()+i,bytes.begin()+i+x.bytes.size());
           bytes.insert(bytes.begin()+i,y.bytes.begin(),y.bytes.end());
-          return;
+          this->len = (this->len - x.len) + y.len;
+          return true;
         }
       }
       //advance using utf8 rules
@@ -407,10 +410,19 @@ public:
         continue;
       }
     }
+    return false;
   }
-  int length() const
+  size_t length() const
   {
     return len;
+  }
+  void showBytes()
+  {
+    for(auto e: bytes)
+    {
+      printf("%x ", e);
+    }
+    puts("");
   }
   void write(FILE* fp = stdout) const
   {
@@ -425,24 +437,27 @@ int main()
     SetConsoleOutputCP( 65001 );
   #endif
   //Use utf-8 encoding when saving this file
+
   //Initialize from vector of bytes
   u8string str({0xe2,0x88,0x82,0x20,0xe2,0x88,0x86,0x20,0xe2,0x88,0x8f,0x20,0xe2,0x88,0x91,'\n'});
-  printf("length = %d\n",str.length());
+  printf("length = %ld\n",str.length());
   str.write();
   printf("\nindividual codepoints in hex: \n");
-  for(int i=0;i<str.length();i++)
+  for(size_t i=0;i<str.length();i++)
   {
     printf("U+%x\n",str[i]);
   }
   printf("---------------\n");
   //Or initialize from cstring
-  u8string another("∂ ∆ ∏ ∑\n");
+  u8string another(u8"∂ ∆ ∏ ∑\n");
   another.write();
-  printf("%d\n",another.find("∏ ∑"));//search for substring
+  printf("%d\n",another.find(u8"∏ ∑"));//search for substring
   printf("%d\n",another.find(0x2211));//search for codepoint
-  printf("%d\n",another.find("abc"));//prints INT_MAX
+  printf("%d\n",another.find(u8"abc"));//prints INT_MAX
   u8string copy = another;
-  copy.replace("∏ ∑","a b");
+
+  copy.replace(u8string(u8"∏ ∑"),u8string(u8"a b"));
   copy.write();
+
   return 0;
 }
